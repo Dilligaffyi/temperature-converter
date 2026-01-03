@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Temperature Converter • DILLIGAF.FYI</title>
+  <meta name="description" content="Convert Celsius and Fahrenheit. Includes dew point, heat index, humidex, and comfort notes. Made by DILLIGAF.FYI." />
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #0f1a2e;
+      --text: #e8eefc;
+      --muted: #a9b6d3;
+      --link: #7fb0ff;
+      --btn: #1f6feb;
+      --btn2: rgba(255,255,255,.12);
+      --border: rgba(255,255,255,.12);
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(31,111,235,.35), transparent 60%),
+                  radial-gradient(900px 500px at 90% 30%, rgba(127,176,255,.25), transparent 55%),
+                  var(--bg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      line-height: 1.45;
+      padding: 28px;
+    }
+
+    .wrap { max-width: 900px; margin: 0 auto; }
+    header { margin-bottom: 18px; }
+
+    h1 { margin: 0 0 6px 0; font-size: 1.8rem; letter-spacing: .2px; }
+    .sub { margin: 0; color: var(--muted); font-size: .98rem; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 780px) { .grid { grid-template-columns: 1.1fr .9fr; } }
+
+    label { display: block; font-weight: 700; margin-bottom: 6px; }
+
+    input[type="number"], select {
+      width: 100%;
+      padding: 10px 11px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      outline: none;
+    }
+
+    .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .row.two { grid-template-columns: 2fr 1fr; gap: 10px; }
+
+    .hint { color: var(--muted); font-size: .9rem; margin-top: 6px; }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    button, input[type="reset"] {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    .primary { background: var(--btn); color: white; }
+    .secondary { background: var(--btn2); color: var(--text); border: 1px solid var(--border); }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(0,0,0,.18);
+      padding: 14px;
+    }
+
+    .big {
+      font-size: 1.6rem;
+      font-weight: 900;
+      margin: 0 0 6px 0;
+    }
+
+    .kv { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+    @media (min-width: 780px) { .kv { grid-template-columns: 1fr 1fr; } }
+
+    .k {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+    }
+    .k .t { color: var(--muted); font-size: .85rem; margin: 0; }
+    .k .v { font-size: 1.1rem; font-weight: 900; margin: 2px 0 0 0; }
+
+    details {
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.12);
+    }
+    summary { cursor: pointer; font-weight: 900; }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: .95em;
+    }
+
+    .brand {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+    .heart { color: #ff4d7d; font-weight: 900; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Temperature Converter</h1>
+      <p class="sub">
+        Convert °C ⇄ °F + Dew Point + Heat Index + Humidex.
+        Built by <a href="https://dilligaf.fyi" target="_blank" rel="noopener">DILLIGAF.FYI</a>.
+      </p>
+    </header>
+
+    <main class="card">
+      <form name="tempForm" onsubmit="return false;">
+        <div class="grid">
+          <!-- Inputs -->
+          <section>
+            <div class="panel">
+              <label>Temperature</label>
+              <div class="row two">
+                <input type="number" name="temp" step="any" required placeholder="e.g. 22">
+                <select name="unit" aria-label="Temperature unit">
+                  <option value="C">°C</option>
+                  <option value="F">°F</option>
+                </select>
+              </div>
+              <div class="hint">Pick the unit that matches what you typed.</div>
+
+              <div style="height:12px"></div>
+
+              <label>Relative Humidity (optional)</label>
+              <input type="number" name="rh" step="any" min="0" max="100" placeholder="e.g. 55">
+              <div class="hint">
+                Used for Dew Point, Heat Index, and Humidex. Leave blank if you just want °C/°F conversion.
+              </div>
+
+              <div class="actions">
+                <button type="button" class="primary" id="convertBtn">Convert</button>
+                <input type="reset" class="secondary" value="Reset">
+              </div>
+            </div>
+
+            <details>
+              <summary>What is “dew index”?</summary>
+              <p class="hint" style="margin-top:10px;">
+                People usually mean <strong>Dew Point</strong>: the temperature at which air becomes saturated and water
+                condenses. It’s a great “mugginess” indicator (higher dew point = stickier).
+              </p>
+            </details>
+
+            <details>
+              <summary>Formulas used</summary>
+              <p class="hint" style="margin-top:10px;">
+                <strong>Convert:</strong> <code>F = C×9/5 + 32</code>, <code>C = (F−32)×5/9</code><br>
+                <strong>Dew point (Magnus):</strong> using <code>a=17.62</code>, <code>b=243.12</code> (°C)<br>
+                <strong>Heat Index:</strong> NOAA-style regression (valid mainly for warm temps, RH ≥ 40%)<br>
+                <strong>Humidex:</strong> Canadian humidex formula based on dew point
+              </p>
+            </details>
+          </section>
+
+          <!-- Outputs -->
+          <aside>
+            <div class="panel">
+              <p class="big">Results</p>
+              <p class="hint" id="statusOut">Enter a temperature and click Convert.</p>
+
+              <div class="kv">
+                <div class="k">
+                  <p class="t">Celsius</p>
+                  <p class="v" id="cOut">—</p>
+                </div>
+                <div class="k">
+                  <p class="t">Fahrenheit</p>
+                  <p class="v" id="fOut">—</p>
+                </div>
+                <div class="k">
+                  <p class="t">Dew Point</p>
+                  <p class="v" id="dpOut">—</p>
+                </div>
+                <div class="k">
+                  <p class="t">Heat Index</p>
+                  <p class="v" id="hiOut">—</p>
+                </div>
+                <div class="k">
+                  <p class="t">Humidex</p>
+                  <p class="v" id="hxOut">—</p>
+                </div>
+                <div class="k">
+                  <p class="t">Comfort note</p>
+                  <p class="v" id="noteOut" style="font-size:1rem;">—</p>
+                </div>
+              </div>
+
+              <div class="brand">
+                Made with <span class="heart">♥</span> by
+                <a href="https://dilligaf.fyi" target="_blank" rel="noopener" style="font-weight:900;">DILLIGAF.FYI</a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script>
+    const form = document.forms.tempForm;
+
+    const cOut = document.getElementById("cOut");
+    const fOut = document.getElementById("fOut");
+    const dpOut = document.getElementById("dpOut");
+    const hiOut = document.getElementById("hiOut");
+    const hxOut = document.getElementById("hxOut");
+    const noteOut = document.getElementById("noteOut");
+    const statusOut = document.getElementById("statusOut");
+
+    document.getElementById("convertBtn").addEventListener("click", () => convert());
+
+    // Helpers
+    const toF = (c) => c * 9/5 + 32;
+    const toC = (f) => (f - 32) * 5/9;
+
+    function dewPointC(tempC, rh) {
+      // Magnus formula (good general-purpose approximation)
+      // rh in %
+      const a = 17.62;
+      const b = 243.12; // °C
+      const gamma = Math.log(rh / 100) + (a * tempC) / (b + tempC);
+      return (b * gamma) / (a - gamma);
+    }
+
+    function heatIndexF(tempF, rh) {
+      // NOAA regression (best for T >= ~80°F and RH >= ~40)
+      // We'll compute anyway, but label if not in typical range.
+      const T = tempF;
+      const R = rh;
+      const HI =
+        -42.379 +
+        2.04901523 * T +
+        10.14333127 * R +
+        -0.22475541 * T * R +
+        -0.00683783 * T * T +
+        -0.05481717 * R * R +
+        0.00122874 * T * T * R +
+        0.00085282 * T * R * R +
+        -0.00000199 * T * T * R * R;
+
+      return HI;
+    }
+
+    function humidex(tempC, dewC) {
+      // Humidex based on dew point (Environment Canada style)
+      // e = 6.11 * exp(5417.7530 * (1/273.16 - 1/(273.15+Td)))
+      const e = 6.11 * Math.exp(5417.7530 * (1/273.16 - 1/(273.15 + dewC)));
+      return tempC + 0.5555 * (e - 10.0);
+    }
+
+    function dewPointNote(dpC) {
+      // Simple comfort scale (approximate)
+      if (dpC < 10) return "Dry / comfortable";
+      if (dpC < 16) return "Comfortable";
+      if (dpC < 18) return "Slightly humid";
+      if (dpC < 21) return "Humid / sticky";
+      if (dpC < 24) return "Very humid";
+      return "Oppressive humidity";
+    }
+
+    function convert() {
+      const t = parseFloat(form.temp.value);
+      const unit = form.unit.value;
+      const rhRaw = form.rh.value.trim();
+      const rh = rhRaw === "" ? NaN : parseFloat(rhRaw);
+
+      if (isNaN(t)) {
+        alert("Please enter a valid temperature.");
+        return;
+      }
+
+      // Normalize to C/F
+      const tempC = unit === "C" ? t : toC(t);
+      const tempF = unit === "F" ? t : toF(t);
+
+      cOut.textContent = `${tempC.toFixed(2)} °C`;
+      fOut.textContent = `${tempF.toFixed(2)} °F`;
+
+      // If no RH, just show conversions
+      if (isNaN(rh)) {
+        dpOut.textContent = "—";
+        hiOut.textContent = "—";
+        hxOut.textContent = "—";
+        noteOut.textContent = "Add humidity for dew point & feels-like.";
+        statusOut.textContent = "Converted temperature. (Add humidity for more.)";
+        return;
+      }
+
+      if (rh < 0 || rh > 100) {
+        alert("Humidity must be between 0 and 100.");
+        return;
+      }
+
+      // Dew point
+      const dpC = dewPointC(tempC, rh);
+      const dpF = toF(dpC);
+
+      // Heat index (in °F), and then convert to °C
+      const hiF = heatIndexF(tempF, rh);
+      const hiC = toC(hiF);
+
+      // Humidex (dimensionless, usually shown as a number like “feels like 35”)
+      const hx = humidex(tempC, dpC);
+
+      dpOut.textContent = `${dpC.toFixed(2)} °C / ${dpF.toFixed(2)} °F`;
+
+      // Heat index is meaningful mainly when warm; we’ll label when outside typical range
+      let hiLabel = `${hiC.toFixed(2)} °C / ${hiF.toFixed(2)} °F`;
+      if (tempF < 80 || rh < 40) {
+        hiLabel += " (approx)";
+      }
+      hiOut.textContent = hiLabel;
+
+      hxOut.textContent = `${hx.toFixed(1)}`;
+
+      // Comfort note from dew point
+      noteOut.textContent = dewPointNote(dpC);
+      statusOut.textContent = `Converted with RH=${rh.toFixed(0)}%. Dew point + feels-like estimates shown.`;
+    }
+
+    // Nice UX: convert on Enter key
+    form.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        convert();
+      }
+    });
+  </script>
+</body>
+</html>
